@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Image Puzzle</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+        }
+        #image-container {
+            display: block;
+        }
+        .combined-image {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div id="image-container">
+        <img id="combined-image" class="combined-image" alt="Combined Image">
+    </div>
+
+    <script>
+        // 自动生成图片文件名列表，图片格式为 azhongWebimage_1.jpg 到 azhongWebimage_100.jpg
+        const totalImages = 100; // 总共100张图片
+        const images = [];
+
+        for (let i = 1; i <= totalImages; i++) {
+            images.push(`azhongWebimage_${i}.png`);
+        }
+        
+        // 固定的第二张图片，放在与 index.html 同级目录
+        const fixedImage = 'fixedImage.jpg'; // 固定图片的文件名
+
+        // 随机选择第一张图片
+        function getRandomImage() {
+            return images[Math.floor(Math.random() * images.length)];
+        }
+
+        // 拼接两张图片
+        function combineImages() {
+            const randomImage = getRandomImage();
+            const randomImageElement = new Image();
+            const fixedImageElement = new Image();
+
+            randomImageElement.src = `images/${randomImage}`; // 随机图片来自 images 文件夹
+            fixedImageElement.src = fixedImage; // 固定图片位于与 index.html 同级目录
+
+            const combinedCanvas = document.createElement('canvas');
+            const context = combinedCanvas.getContext('2d');
+
+            // 当第一张图片加载完后，处理拼接
+            randomImageElement.onload = function () {
+                combinedCanvas.width = Math.max(randomImageElement.width, fixedImageElement.width);
+                combinedCanvas.height = randomImageElement.height + fixedImageElement.height;
+
+                // 绘制第一张随机图片
+                context.drawImage(randomImageElement, 0, 0);
+
+                // 当固定图片加载完后，处理拼接
+                fixedImageElement.onload = function () {
+                    // 绘制固定图片在第一张图片的下方
+                    context.drawImage(fixedImageElement, 0, randomImageElement.height);
+
+                    // 将拼接的图片展示到页面上
+                    const combinedImageElement = document.getElementById('combined-image');
+                    combinedImageElement.src = combinedCanvas.toDataURL();
+                };
+            };
+        }
+
+        // 页面加载时执行拼接
+        window.onload = combineImages;
+    </script>
+</body>
+</html>
